@@ -98,7 +98,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: functionWorkerRuntime
         }
         {
-          name: 'MastodonSettings__instance'
+          name: 'MastodonSettings__token'
           value: mastadonToken
         }
         {
