@@ -23,7 +23,6 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }} # set up AZURE_RBAC_CREDENTIALS secrets in your repository
 
-
     - name: deploy
       uses: azure/arm-deploy@v1
       with:
@@ -41,9 +40,10 @@ jobs:
     - name: 'Resolve Project Dependencies Using Dotnet'
       shell: bash
       run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         dotnet build --configuration Release --output ./output
-        popd
+
+        ls -al ./output
+      working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
     - name: 'Run Azure Functions Action'
       uses: Azure/functions-action@v1
