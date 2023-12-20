@@ -38,22 +38,17 @@ public class CfsFunction
 
         var newList = new List<CfsFeedItem>();
 
-        var now = DateTime.Now;
-
         foreach (XElement item in xmlItems)
         {
             var dateTime = DateTime.Parse(item.Element("pubDate").Value);
 
-            if (dateTime < now)
-            {
-                newList.Add(new CfsFeedItem(
-                    item.Element("guid").Value,
-                    item.Element("title").Value,
-                    item.Element("description").Value,
-                    item.Element("link").Value,
-                    dateTime
-                ));
-            }
+            newList.Add(new CfsFeedItem(
+                item.Element("guid").Value,
+                item.Element("title").Value,
+                item.Element("description").Value,
+                item.Element("link").Value,
+                dateTime
+            ));
         }
 
         // Find items in newList that are not in oldList
