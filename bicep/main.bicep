@@ -54,7 +54,9 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
     name: 'Y1'
     tier: 'Dynamic'
   }
-  properties: {}
+  kind: 'linux'
+  properties: {
+  }
 }
 
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
