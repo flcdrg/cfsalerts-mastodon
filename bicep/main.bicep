@@ -53,13 +53,14 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   sku: {
     name: 'Y1'
     tier: 'Dynamic'
+    size: 'Y1'
+    family: 'Y'
   }
   kind: 'linux'
-  properties: {
-  }
+  properties: {}
 }
 
-resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
+resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp,linux'
@@ -107,10 +108,9 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: 'mastodon.online'
         }
       ]
-      ftpsState: 'Disabled'
+      
       minTlsVersion: '1.2'
       linuxFxVersion: 'DOTNET-ISOLATED|8.0'
-      publicNetworkAccess: 'Disabled'
       alwaysOn: false
     }
     httpsOnly: true
