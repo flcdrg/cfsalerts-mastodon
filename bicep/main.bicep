@@ -39,15 +39,15 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     supportsHttpsTrafficOnly: true
     defaultToOAuthAuthentication: true
     allowBlobPublicAccess: true
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
     minimumTlsVersion: 'TLS1_2'
     isLocalUserEnabled: false
-    networkAcls: {
-      bypass: 'AzureServices'
-      defaultAction: 'Deny'
-      ipRules: []
-      virtualNetworkRules: []
-    }
+    // networkAcls: {
+    //   bypass: 'AzureServices'
+    //   defaultAction: 'Deny'
+    //   ipRules: []
+    //   virtualNetworkRules: []
+    // }
 
   }
 }
