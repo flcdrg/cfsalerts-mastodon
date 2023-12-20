@@ -57,7 +57,9 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
     family: 'Y'
   }
   kind: 'linux'
-  properties: {}
+  properties: {
+    reserved: true
+  }
 }
 
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
@@ -69,6 +71,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   }
   properties: {
     serverFarmId: hostingPlan.id
+    reserved: true
     siteConfig: {
       appSettings: [
         {
