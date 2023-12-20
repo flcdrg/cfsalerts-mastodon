@@ -1,25 +1,23 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 
 namespace CfsAlerts;
 
 public class CheckFeed
 {
-    private readonly ILogger _logger;
 
-    public CheckFeed(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<CheckFeed>();
-    }
+    //[Function("CheckFeed")]
+    //public static async Task TimerTriggerFunction([TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo myTimer, [DurableClient] DurableTaskClient client, FunctionContext executionContext)
+    //{
+    //    ILogger logger = executionContext.GetLogger(nameof(TimerTriggerFunction));
 
-    [Function("CheckFeed")]
-    public void Run([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer)
-    {
-        _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-            
-        if (myTimer.ScheduleStatus is not null)
-        {
-            _logger.LogInformation($"Next timer schedule at: {myTimer.ScheduleStatus.Next}");
-        }
-    }
+    //    string instanceId = await client.ScheduleNewOrchestrationInstanceAsync("MonitorJobStatus");
+    //    logger.LogInformation("Created new orchestration with instance ID = {instanceId}", instanceId);
+
+    //    if (myTimer.ScheduleStatus is not null)
+    //    {
+    //        logger.LogInformation($"Next timer schedule at: {myTimer.ScheduleStatus.Next}");
+    //    }
+    //}
 }
