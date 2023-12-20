@@ -38,10 +38,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   properties: {
     supportsHttpsTrafficOnly: true
     defaultToOAuthAuthentication: true
-    allowBlobPublicAccess: true
-    publicNetworkAccess: 'Enabled'
+    // allowBlobPublicAccess: true
+    // publicNetworkAccess: 'Enabled'
     minimumTlsVersion: 'TLS1_2'
-    isLocalUserEnabled: false
+    //isLocalUserEnabled: false
     // networkAcls: {
     //   bypass: 'AzureServices'
     //   defaultAction: 'Deny'
