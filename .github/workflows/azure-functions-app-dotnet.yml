@@ -30,7 +30,7 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
         resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
         template: ./bicep/main.bicep
-        parameters: ''
+        parameters: 'mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}'
         failOnStdErr: false
 
     - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment

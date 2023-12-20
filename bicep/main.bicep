@@ -20,6 +20,8 @@ param appInsightsLocation string = resourceGroup().location
 ])
 param runtime string = 'dotnet'
 
+param mastadonToken string
+
 var functionAppName = 'func-cfsalerts-prod-australiasoutheast'
 var hostingPlanName = 'plan-cfsalerts-prod-australiasoutheast'
 var applicationInsightsName = 'appi-cfsalerts-prod-australiasoutheast'
@@ -37,7 +39,16 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     supportsHttpsTrafficOnly: true
     defaultToOAuthAuthentication: true
     allowBlobPublicAccess: false
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
+    minimumTlsVersion: 'TLS1_2'
+    isLocalUserEnabled: false
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: 'Deny'
+      ipRules: []
+      virtualNetworkRules: []
+    }
+
   }
 }
 
@@ -85,6 +96,14 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: functionWorkerRuntime
+        }
+        {
+          name: 'MastodonSettings__instance'
+          value: mastadonToken
+        }
+        {
+          name: 'MastodonSettings__instance'
+          value: 'mastodon.online'
         }
       ]
       ftpsState: 'Disabled'
