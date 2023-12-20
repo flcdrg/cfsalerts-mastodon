@@ -62,7 +62,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'
   }
@@ -95,6 +95,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: functionWorkerRuntime
         }
         {
+          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
+          value: '1'
+        }
+        {
           name: 'MastodonSettings__token'
           value: mastadonToken
         }
@@ -107,6 +111,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
       minTlsVersion: '1.2'
       linuxFxVersion: 'DOTNET-ISOLATED|8.0'
       publicNetworkAccess: 'Disabled'
+      alwaysOn: false
     }
     httpsOnly: true
   }
