@@ -1,9 +1,9 @@
-using System.Xml.Linq;
+using Azure.Core;
+using Mastonet.Entities;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.DurableTask;
 using Microsoft.DurableTask.Client;
-using Microsoft.Extensions.Logging;
 
 namespace CfsAlerts;
 
@@ -22,56 +22,11 @@ public static class Function
             lastValue = await context.CallActivityAsync<List<CfsFeedItem>>(nameof(CfsFunction.CheckAlerts), lastValue);
 
             // Orchestration sleeps until this time.
-            var nextCheck = context.CurrentUtcDateTime.AddSeconds(60);
+            var nextCheck = context.CurrentUtcDateTime.AddMinutes(5);
             await context.CreateTimer(nextCheck, CancellationToken.None);
         }
 
         // Perform more work here, or let the orchestration end.
-    }
-}
-
-public class CfsFunction(IHttpClientFactory httpClientFactory, ILogger<CfsFunction> logger)
-{
-    [Function(nameof(CheckAlerts))]
-    public async Task<List<CfsFeedItem>> CheckAlerts([ActivityTrigger] List<CfsFeedItem> oldList)
-    {
-        using var httpClient = httpClientFactory.CreateClient();
-
-        var response = await httpClient.GetStringAsync("https://data.eso.sa.gov.au/prod/cfs/criimson/cfs_current_incidents.xml");
-
-        var xml = XDocument.Parse(response);
-
-        if (xml.Root.Element("channel") is null)
-            throw new Exception("No channel element found in feed");
-
-        var xmlItems = xml.Root.Element("channel").Elements("item").ToList();
-
-        var newList = new List<CfsFeedItem>();
-
-        foreach (XElement item in xmlItems)
-        {
-            //logger.LogInformation("pubDate {date}", DateTime.Parse(item.Element("pubDate").Value));
-
-            newList.Add(new CfsFeedItem(
-                item.Element("guid").Value,
-                item.Element("title").Value,
-                item.Element("description").Value,
-                item.Element("link").Value,
-                DateTime.Parse(item.Element("pubDate").Value)
-            ));
-        }
-
-        // Find items in newList that are not in oldList
-        var newItems = newList.Except(oldList);
-
-        foreach (var newItem in newItems)
-        {
-            logger.LogInformation("New item: {item}", newItem);
-        }
-
-        logger.LogTrace(xml.ToString());
-
-        return newList;
     }
 }
 
