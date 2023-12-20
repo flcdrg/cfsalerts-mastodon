@@ -13,12 +13,7 @@ param location string = resourceGroup().location
 param appInsightsLocation string = resourceGroup().location
 
 @description('The language worker runtime to load in the function app.')
-@allowed([
-  'node'
-  'dotnet'
-  'java'
-])
-param runtime string = 'dotnet'
+param runtime string = 'dotnet-isolated'
 
 param mastadonToken string
 
