@@ -30,18 +30,19 @@ public static class Function
     }
 }
 
-public class CfsFunction(IHttpClientFactory httpClientFactory)
+public class CfsFunction(IHttpClientFactory httpClientFactory, ILogger<CfsFunction> logger)
 {
     [Function(nameof(CheckAlerts))]
-    public async Task<List<CfsFeedItem>> CheckAlerts([ActivityTrigger] List<CfsFeedItem> oldList, FunctionContext executionContext)
+    public async Task<List<CfsFeedItem>> CheckAlerts([ActivityTrigger] List<CfsFeedItem> oldList)
     {
-        ILogger logger = executionContext.GetLogger(nameof(CheckAlerts));
-
         using var httpClient = httpClientFactory.CreateClient();
 
         var response = await httpClient.GetStringAsync("https://data.eso.sa.gov.au/prod/cfs/criimson/cfs_current_incidents.xml");
 
         var xml = XDocument.Parse(response);
+
+        if (xml.Root.Element("channel") is null)
+            throw new Exception("No channel element found in feed");
 
         var xmlItems = xml.Root.Element("channel").Elements("item").ToList();
 

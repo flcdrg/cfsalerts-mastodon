@@ -1,0 +1,37 @@
+﻿[
+  {
+    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564691.,
+    Title: PEWSEY STREET, ELIZABETH (Grass Fire),
+    Description: First Reported: Wednesday, 20 Dec 2023 14:43:00<br>Status: GOING<br>Region: MFS,
+    Link: https://www.cfs.sa.gov.au/incidents/,
+    PubDate: DateTime_1
+  },
+  {
+    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564669.,
+    Title: CHANDOS TCE/RAILWAY TCE N , LAMEROO (Rescue),
+    Description: First Reported: Wednesday, 20 Dec 2023 12:55:00<br>Status: GOING<br>Region: 3,
+    Link: https://www.cfs.sa.gov.au/incidents/,
+    PubDate: DateTime_2
+  },
+  {
+    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564639.,
+    Title: HESTERS ROAD, RIVERTON (Grass Fire),
+    Description: First Reported: Wednesday, 20 Dec 2023 10:00:00<br>Status: CONTROLLED<br>Region: 2,
+    Link: https://www.cfs.sa.gov.au/incidents/,
+    PubDate: DateTime_3
+  },
+  {
+    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1563632.0007231,
+    Title: Gluepot ROAD, GLUE POT (Forest Fire),
+    Description: First Reported: Wednesday, 13 Dec 2023 12:35:00<br>Status: SAFE<br>Region: 3,
+    Link: https://www.cfs.sa.gov.au/incidents/,
+    PubDate: DateTime_4
+  },
+  {
+    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564683.,
+    Title: YORKE HIGHWAY, SANDILANDS (Vehicle Accident),
+    Description: First Reported: Wednesday, 20 Dec 2023 14:03:00<br>Status: COMPLETE<br>Region: 2,
+    Link: https://www.cfs.sa.gov.au/incidents/,
+    PubDate: DateTime_5
+  }
+]
