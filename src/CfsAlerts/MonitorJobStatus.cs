@@ -5,20 +5,23 @@ namespace CfsAlerts;
 
 public static class MonitorJobStatus
 {
+    // Follows the 'Eternal orchestration' pattern
+    // https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-eternal-orchestrations?WT.mc_id=DOP-MVP-5001655
     [Function(nameof(MonitorJobStatus))]
     public static async Task Run(
-        [OrchestrationTrigger] TaskOrchestrationContext context)
+        [OrchestrationTrigger] TaskOrchestrationContext context, List<CfsFeedItem> lastValue)
     {
-        var lastValue = new List<CfsFeedItem>();
-        while (true)
-        {
-            lastValue = await context.CallActivityAsync<List<CfsFeedItem>>(nameof(CfsFunction.CheckAlerts), lastValue);
+        var newValue = await context.CallActivityAsync<List<CfsFeedItem>>(nameof(CfsFunction.CheckAlerts), lastValue);
 
-            // Orchestration sleeps until this time (TTL is 15 minutes in RSS)
-            var nextCheck = context.CurrentUtcDateTime.AddMinutes(15);
-            await context.CreateTimer(nextCheck, CancellationToken.None);
-        }
+#if RELEASE
+        // Orchestration sleeps until this time (TTL is 15 minutes in RSS)
+        var nextCheck = context.CurrentUtcDateTime.AddMinutes(15);
+#else
+        var nextCheck = context.CurrentUtcDateTime.AddSeconds(20);
+#endif
 
-        // Perform more work here, or let the orchestration end.
+        await context.CreateTimer(nextCheck, CancellationToken.None);
+
+        context.ContinueAsNew(newValue);
     }
 }

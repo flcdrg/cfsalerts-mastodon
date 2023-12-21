@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CfsAlerts.Tests", "CfsAlerts.Tests\CfsAlerts.Tests.csproj", "{C6AEB1C8-2F66-41FF-9A00-F8196F50B096}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CfsAlerts.Tests", "CfsAlerts.Tests\CfsAlerts.Tests.csproj", "{C6AEB1C8-2F66-41FF-9A00-F8196F50B096}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CfsAlerts", "CfsAlerts\CfsAlerts.csproj", "{CC2B8E42-D53A-41CA-9EFA-ACFA4529A5BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CfsAlerts", "CfsAlerts\CfsAlerts.csproj", "{CC2B8E42-D53A-41CA-9EFA-ACFA4529A5BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

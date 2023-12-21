@@ -28,7 +28,7 @@ namespace CfsAlerts
 
             try
             {
-                await _durableTaskClient.ScheduleNewOrchestrationInstanceAsync("MonitorJobStatus", new StartOrchestrationOptions( InstanceId: instanceId));
+                await _durableTaskClient.ScheduleNewOrchestrationInstanceAsync("MonitorJobStatus", new List<CfsFeedItem>(), new StartOrchestrationOptions( InstanceId: instanceId));
             }
             catch (Exception ex)
             {
