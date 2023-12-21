@@ -66,7 +66,7 @@ public class CfsFunction
                 _logger.LogInformation("Tooting: {item}", message);
 
 #if RELEASE
-                await client.PublishStatus(message, Visibility.Private);
+                await client.PublishStatus(message, Visibility.Unlisted);
 #endif
             }
         }
