@@ -60,5 +60,6 @@ jobs:
 
         URL=$(az functionapp function show --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_FUNCTIONAPP_NAME }} --function-name StartOrchestration --query "invokeUrlTemplate" -o tsv)
         # Call function https://func-cfsalerts-prod-australiasoutheast.azurewebsites.net/api/StartOrchestration?code=tyPZ23gIY37ICFejcbd-2OwQV39GhLbDs2o4N8LVXgXdAzFu12YEMA==
-        # curl -X GET $URL?code=$KEY
+
         echo "$URL?code=$KEY"
+        curl -X GET $URL?code=$KEY

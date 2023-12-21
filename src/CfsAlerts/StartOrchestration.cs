@@ -26,7 +26,14 @@ namespace CfsAlerts
             // This should ensure we only have a single orchestration running at a time
             const string instanceId = "MonitorJobStatus 1B5BF432-5DEA-481D-AE45-32AB347C8F2F";
 
-            await _durableTaskClient.ScheduleNewOrchestrationInstanceAsync("MonitorJobStatus", new StartOrchestrationOptions( InstanceId: instanceId));
+            try
+            {
+                await _durableTaskClient.ScheduleNewOrchestrationInstanceAsync("MonitorJobStatus", new StartOrchestrationOptions( InstanceId: instanceId));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "ScheduleNewOrchestrationInstanceAsync failed - maybe it was already running?");
+            }
             
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
