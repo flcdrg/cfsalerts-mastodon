@@ -70,6 +70,10 @@ public class CfsFunction
 #endif
             }
         }
+        else
+        {
+            _logger.LogInformation("No new items found");
+        }
 
         return newList;
     }
