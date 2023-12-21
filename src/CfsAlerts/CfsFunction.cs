@@ -63,9 +63,11 @@ public class CfsFunction
             {
                 string message = $"{item.Title}\n\n{item.Description.Replace("<br>", "\n")}\n{item.Link}";
 
-                _logger.LogWarning("Tooting: {item}", message);
+                _logger.LogInformation("Tooting: {item}", message);
 
+#if RELEASE
                 await client.PublishStatus(message, Visibility.Private);
+#endif
             }
         }
 

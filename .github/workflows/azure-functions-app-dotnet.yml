@@ -51,3 +51,14 @@ jobs:
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
         package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
+    - name: 'Start things'
+      shell: bash
+      run: |
+        # Get function key
+        KEY=$(az functionapp function keys list --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_FUNCTIONAPP_NAME }} --function-name StartOrchestration --query "default" -o tsv)
+
+        URL=$(az functionapp function show --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_FUNCTIONAPP_NAME }} --function-name StartOrchestration --query "invokeUrlTemplate" -o tsv)
+        # Call function https://func-cfsalerts-prod-australiasoutheast.azurewebsites.net/api/StartOrchestration?code=tyPZ23gIY37ICFejcbd-2OwQV39GhLbDs2o4N8LVXgXdAzFu12YEMA==
+        # curl -X GET $URL?code=$KEY
+        echo "$URL?code=$KEY"
