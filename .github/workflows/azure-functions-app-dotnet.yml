@@ -26,8 +26,7 @@ jobs:
       - name: Test
         uses: azure/arm-deploy@v1
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
           parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
           failOnStdErr: false
@@ -92,8 +91,7 @@ jobs:
         uses: azure/arm-deploy@v1
         id: deploy
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
           parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
           failOnStdErr: false
