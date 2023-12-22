@@ -113,9 +113,9 @@ jobs:
         shell: bash
         run: |
           # Get function key
-          KEY=$(az functionapp function keys list --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ steps.deploy.outputs.functionAppName }} --function-name StartOrchestration --query "default" -o tsv)
+          KEY=$(az functionapp function keys list --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ steps.deploy.outputs.functionAppName }} --function-name StartOrchestration --query "default" -o tsv)
 
-          URL=$(az functionapp function show --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ steps.deploy.outputs.functionAppName }} --function-name StartOrchestration --query "invokeUrlTemplate" -o tsv)
+          URL=$(az functionapp function show --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ steps.deploy.outputs.functionAppName }} --function-name StartOrchestration --query "invokeUrlTemplate" -o tsv)
           # Call function https://func-cfsalerts-prod-australiasoutheast.azurewebsites.net/api/StartOrchestration?code=tyPZ23gIY37ICFejcbd-2OwQV39GhLbDs2o4N8LVXgXdAzFu12YEMA==
 
           echo "$URL?code=$KEY"
