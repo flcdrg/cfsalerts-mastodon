@@ -23,45 +23,36 @@ var applicationInsightsName = 'appi-cfsalerts-prod-australiasoutheast'
 var storageAccountName = 'stcfsalertsprodause'
 var functionWorkerRuntime = runtime
 
+// https://learn.microsoft.com/azure/templates/microsoft.storage/storageaccounts?WT.mc_id=DOP-MVP-5001655
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
   location: location
   sku: {
     name: storageAccountType
   }
-  kind: 'Storage'
+  kind: 'StorageV2'
   properties: {
     supportsHttpsTrafficOnly: true
     defaultToOAuthAuthentication: true
-    // allowBlobPublicAccess: true
-    // publicNetworkAccess: 'Enabled'
+    allowBlobPublicAccess: false
     minimumTlsVersion: 'TLS1_2'
-    //isLocalUserEnabled: false
-    // networkAcls: {
-    //   bypass: 'AzureServices'
-    //   defaultAction: 'Deny'
-    //   ipRules: []
-    //   virtualNetworkRules: []
-    // }
-
   }
 }
 
+// https://learn.microsoft.com/azure/templates/microsoft.web/serverfarms?WT.mc_id=DOP-MVP-5001655
 resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: hostingPlanName
   location: location
   sku: {
     name: 'Y1'
-    tier: 'Dynamic'
-    size: 'Y1'
-    family: 'Y'
   }
-  kind: 'linux'
+  kind: 'functionapp'
   properties: {
     reserved: true
   }
 }
 
+// https://learn.microsoft.com/azure/templates/microsoft.web/sites?WT.mc_id=DOP-MVP-5001655
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
   location: location
@@ -69,6 +60,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   identity: {
     type: 'SystemAssigned'
   }
+
   properties: {
     serverFarmId: hostingPlan.id
     reserved: true
@@ -111,26 +103,36 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: 'mastodon.online'
         }
       ]
-      
+
       minTlsVersion: '1.2'
       linuxFxVersion: 'DOTNET-ISOLATED|8.0'
       alwaysOn: false
+      localMySqlEnabled: false
+      netFrameworkVersion: 'v4.6'
+      ftpsState: 'Disabled'
+      http20Enabled: true
     }
     httpsOnly: true
   }
 }
 
+@description('The name of the function app.')
+output functionAppName string = functionApp.name
+
+// https://learn.microsoft.com/azure/templates/microsoft.insights/components?WT.mc_id=DOP-MVP-5001655
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
   location: appInsightsLocation
   kind: 'web'
   properties: {
     Application_Type: 'web'
+    Flow_Type: 'Bluefield'
     Request_Source: 'rest'
     WorkspaceResourceId: logAnalyticsWorkspace.id
   }
 }
 
+// https://learn.microsoft.com/azure/templates/microsoft.operationalinsights/workspaces?WT.mc_id=DOP-MVP-5001655
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: 'law-cfsalerts-prod-australiasoutheast'
   location: location

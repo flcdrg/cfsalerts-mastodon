@@ -1,65 +1,124 @@
-name: Deploy DotNet project to Azure Function App
+name: Build and Deploy
 
 on:
   push:
     branches: ["main"]
+  pull_request:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'func-cfsalerts-prod-australiasoutheast'   # set this to your function app name on Azure
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: './src/CfsAlerts'       # set this to the path to your function app project, defaults to the repository root
-  DOTNET_VERSION: '8.0.x'                   # set this to the dotnet version to use (e.g. '2.1.x', '3.1.x', '5.0.x')
+  AZURE_FUNCTIONAPP_NAME: "func-cfsalerts-prod-australiasoutheast"
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: "./src/CfsAlerts"
+  DOTNET_VERSION: "8.0.x"
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest # For Linux, use ubuntu-latest
-    environment: dev
+  build-bicep:
+    name: Build Bicep
+    runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v4
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@v4
 
-    - name: 'Login via Azure CLI'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }} # set up AZURE_RBAC_CREDENTIALS secrets in your repository
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }}
 
-    - name: deploy
-      uses: azure/arm-deploy@v1
-      with:
-        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-        resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        template: ./bicep/main.bicep
-        parameters: 'mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}'
-        failOnStdErr: false
+      - name: Test
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          template: ./bicep/main.bicep
+          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
+          failOnStdErr: false
+          additionalArguments: --what-if
 
-    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Archive Bicep
+        if: success() && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v2
+        with:
+          name: bicep
+          path: "./bicep"
 
-    - name: 'Resolve Project Dependencies Using Dotnet'
-      shell: bash
-      run: |
-        dotnet build --configuration Release --output ./output
+  build-dotnet:
+    name: Build .NET
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@v4
 
-        ls -al ./output
-      working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 'Run Azure Functions Action'
-      uses: Azure/functions-action@v1
-      id: fa
-      with:
-        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+      - name: "Build"
+        shell: bash
+        run: |
+          dotnet build --configuration Release --output ./output
 
-    - name: 'Start things'
-      shell: bash
-      run: |
-        # Get function key
-        KEY=$(az functionapp function keys list --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_FUNCTIONAPP_NAME }} --function-name StartOrchestration --query "default" -o tsv)
+          ls -al ./output
+        working-directory: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
-        URL=$(az functionapp function show --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_FUNCTIONAPP_NAME }} --function-name StartOrchestration --query "invokeUrlTemplate" -o tsv)
-        # Call function https://func-cfsalerts-prod-australiasoutheast.azurewebsites.net/api/StartOrchestration?code=tyPZ23gIY37ICFejcbd-2OwQV39GhLbDs2o4N8LVXgXdAzFu12YEMA==
+      - name: "Archive Project"
+        if: success() && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v2
+        with:
+          name: function-app
+          path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output
 
-        echo "$URL?code=$KEY"
-        curl -X GET $URL?code=$KEY
+  deploy:
+    name: Deploy
+    needs:
+      - build-bicep
+      - build-dotnet
+    runs-on: ubuntu-latest
+    environment: dev
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: "Download Artifact"
+        uses: actions/download-artifact@v2
+        with:
+          name: bicep
+          path: "./bicep"
+
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }}
+
+      - name: deploy
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          template: ./bicep/main.bicep
+          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
+          failOnStdErr: false
+
+      - name: "Download Artifact"
+        uses: actions/download-artifact@v2
+        with:
+          name: function-app
+          path: "./function-app"
+
+      - name: "Run Azure Functions Action"
+        uses: Azure/functions-action@v1
+        id: fa
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: "./function-app"
+
+      - name: "Start Orchestration"
+        shell: bash
+        run: |
+          # Get function key
+          KEY=$(az functionapp function keys list --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_FUNCTIONAPP_NAME }} --function-name StartOrchestration --query "default" -o tsv)
+
+          URL=$(az functionapp function show --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_FUNCTIONAPP_NAME }} --function-name StartOrchestration --query "invokeUrlTemplate" -o tsv)
+          # Call function https://func-cfsalerts-prod-australiasoutheast.azurewebsites.net/api/StartOrchestration?code=tyPZ23gIY37ICFejcbd-2OwQV39GhLbDs2o4N8LVXgXdAzFu12YEMA==
+
+          echo "$URL?code=$KEY"
+          curl -X GET $URL?code=$KEY
