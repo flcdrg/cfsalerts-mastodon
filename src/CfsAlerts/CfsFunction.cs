@@ -25,54 +25,64 @@ public class CfsFunction
     [Function(nameof(CheckAlerts))]
     public async Task<List<CfsFeedItem>> CheckAlerts([ActivityTrigger] List<CfsFeedItem> oldList)
     {
-        using var httpClient = _httpClientFactory.CreateClient();
-
-        var response = await httpClient.GetStringAsync("https://data.eso.sa.gov.au/prod/cfs/criimson/cfs_current_incidents.xml");
-
-        var xml = XDocument.Parse(response);
-
-        if (xml.Root.Element("channel") is null)
-            throw new Exception("No channel element found in feed");
-
-        var xmlItems = xml.Root.Element("channel").Elements("item").ToList();
-
         var newList = new List<CfsFeedItem>();
 
-        foreach (XElement item in xmlItems)
+        var response = string.Empty;
+        try
         {
-            var dateTime = DateTime.Parse(item.Element("pubDate").Value);
+            using var httpClient = _httpClientFactory.CreateClient();
 
-            newList.Add(new CfsFeedItem(
-                item.Element("guid").Value,
-                item.Element("title").Value,
-                item.Element("description").Value,
-                item.Element("link").Value,
-                dateTime
-            ));
-        }
+            response = await httpClient.GetStringAsync(
+                "https://data.eso.sa.gov.au/prod/cfs/criimson/cfs_current_incidents.xml");
 
-        // Find items in newList that are not in oldList
-        var newItems = newList.Except(oldList).ToList();
+            var xml = XDocument.Parse(response);
 
-        if (newItems.Any())
-        {
-            var accessToken = _settings.Token;
-            var client = new MastodonClient(_settings.Instance, accessToken);
-            
-            foreach (var item in newItems)
+            if (xml.Root.Element("channel") is null)
+                throw new InvalidOperationException("No channel element found in feed");
+
+            var xmlItems = xml.Root.Element("channel")?.Elements("item").ToList();
+
+            if (xmlItems is not null)
+                foreach (var item in xmlItems)
+                {
+                    var dateTime = DateTime.Parse(item.Element("pubDate").Value);
+
+                    newList.Add(new CfsFeedItem(
+                        item.Element("guid").Value,
+                        item.Element("title").Value,
+                        item.Element("description").Value,
+                        item.Element("link").Value,
+                        dateTime
+                    ));
+                }
+
+            // Find items in newList that are not in oldList
+            var newItems = newList.Except(oldList).ToList();
+
+            if (newItems.Any())
             {
-                string message = $"{item.Title}\n\n{item.Description.Replace("<br>", "\n")}\n{item.Link}";
+                var accessToken = _settings.Token;
+                var client = new MastodonClient(_settings.Instance, accessToken);
 
-                _logger.LogInformation("Tooting: {item}", message);
+                foreach (var item in newItems)
+                {
+                    var message = $"{item.Title}\n\n{item.Description.Replace("<br>", "\n")}\n{item.Link}";
+
+                    _logger.LogInformation("Tooting: {item}", message);
 
 #if RELEASE
                 await client.PublishStatus(message, Visibility.Unlisted);
 #endif
+                }
+            }
+            else
+            {
+                _logger.LogInformation("No new items found");
             }
         }
-        else
+        catch (Exception ex)
         {
-            _logger.LogInformation("No new items found");
+            _logger.LogError(ex, "Problems. Data: {data}", response);
         }
 
         return newList;
