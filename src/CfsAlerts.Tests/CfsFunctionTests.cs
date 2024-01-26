@@ -6,19 +6,18 @@ using NSubstitute;
 
 namespace CfsAlerts.Tests;
 
-[UsesVerify]
 public class CfsFunctionTests
 {
     public static IHttpClientFactory GetStringClient(string returnValue,
         HttpStatusCode returnStatusCode = HttpStatusCode.OK)
     {
-        var httpMessageHandler = Substitute.For<HttpMessageHandler>();
-        var httpClientFactory = Substitute.For<IHttpClientFactory>();
+        var httpMessageHandler = Substitute.For<HttpMessageHandler>()!;
+        var httpClientFactory = Substitute.For<IHttpClientFactory>()!;
 
         httpMessageHandler
             .GetType()
             .GetMethod("SendAsync", BindingFlags.NonPublic | BindingFlags.Instance)
-            .Invoke(httpMessageHandler, new object[] { Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>() })
+            .Invoke(httpMessageHandler, new object[] { Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>() })!
             .Returns(Task.FromResult(new HttpResponseMessage(returnStatusCode)
                 { Content = new StringContent(returnValue) }));
 
@@ -36,13 +35,13 @@ public class CfsFunctionTests
         string oldListContent;
         string newListContent;
 
-        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.oldList.xml"))
+        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.oldList.xml")!)
         {
             using var reader = new StreamReader(stream);
             oldListContent = reader.ReadToEnd();
         }
 
-        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.newList.xml"))
+        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.newList.xml")!)
         {
             using var reader = new StreamReader(stream);
             newListContent = reader.ReadToEnd();
