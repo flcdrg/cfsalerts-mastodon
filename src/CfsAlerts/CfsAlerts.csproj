@@ -8,7 +8,7 @@
     <UserSecretsId>ad33828d-f3a4-442c-9cd7-6486b2cd50d9</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mastonet" Version="2.3.1" />
+    <PackageReference Include="Mastonet" Version="3.1.1" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.20.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.DurableTask" Version="1.1.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
