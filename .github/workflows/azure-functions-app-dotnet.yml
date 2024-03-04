@@ -14,6 +14,9 @@ jobs:
   build-bicep:
     name: Build Bicep
     runs-on: ubuntu-latest
+    concurrency:
+      group: bicep
+      cancel-in-progress: false
     steps:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@v4
@@ -73,6 +76,9 @@ jobs:
       - build-dotnet
     runs-on: ubuntu-latest
     environment: dev
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
     if: github.ref == 'refs/heads/main'
 
     steps:
