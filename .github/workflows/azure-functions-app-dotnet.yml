@@ -41,6 +41,7 @@ jobs:
         with:
           name: bicep
           path: "./bicep"
+          include-hidden-files: true
 
   build-dotnet:
     name: Build .NET
@@ -68,6 +69,7 @@ jobs:
         with:
           name: function-app
           path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output
+          include-hidden-files: true
 
   deploy:
     name: Deploy
