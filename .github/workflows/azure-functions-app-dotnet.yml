@@ -115,6 +115,12 @@ jobs:
           app-name: ${{ steps.deploy.outputs.functionAppName }}
           package: "./function-app"
 
+      - name: Application Insights Annotate
+        uses: ChristopheLav/appinsights-annotate@v2.0.2
+        with:
+          app-id: ${{ secrets.APPINSIGHTS_APP_ID }}
+          name: ${{ github.event.head_commit.message }}
+  
       - name: "Start Orchestration"
         shell: bash
         run: |
