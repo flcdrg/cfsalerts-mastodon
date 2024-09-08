@@ -119,7 +119,8 @@ jobs:
         uses: ChristopheLav/appinsights-annotate@v2.0.2
         with:
           app-id: ${{ secrets.APPINSIGHTS_APP_ID }}
-          name: ${{ github.event.head_commit.message }}
+          name: ${{ github.event.head_commit.message || github.sha }}
+          treat-error-as-warning: true
 
       - name: "Start Orchestration"
         shell: bash
