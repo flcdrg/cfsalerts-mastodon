@@ -120,9 +120,10 @@ jobs:
         with:
           app-id: ${{ secrets.APPINSIGHTS_APP_ID }}
           name: ${{ github.event.head_commit.message }}
-  
+
       - name: "Start Orchestration"
         shell: bash
+        continue-on-error: true
         run: |
           # Get function key
           KEY=$(az functionapp function keys list --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ steps.deploy.outputs.functionAppName }} --function-name StartOrchestration --query "default" -o tsv)
