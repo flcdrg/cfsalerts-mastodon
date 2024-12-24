@@ -86,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     concurrency:
-      group: deploy
+      group: bicep
       cancel-in-progress: false
     if: github.ref == 'refs/heads/main'
 
