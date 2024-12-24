@@ -10,10 +10,14 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: "./src/CfsAlerts"
   DOTNET_VERSION: "8.0.x"
 
+permissions:
+  id-token: write # Require write permission to Fetch an OIDC token.
+
 jobs:
   build-bicep:
     name: Build Bicep
     runs-on: ubuntu-latest
+    environment: dev
     concurrency:
       group: bicep
       cancel-in-progress: false
@@ -24,11 +28,14 @@ jobs:
       - name: "Login via Azure CLI"
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Test
         uses: azure/arm-deploy@v2
         with:
+          scope: resourcegroup
           resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
           parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
@@ -93,12 +100,15 @@ jobs:
       - name: "Login via Azure CLI"
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: deploy
         uses: azure/arm-deploy@v2
         id: deploy
         with:
+          scope: resourcegroup
           resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
           parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
