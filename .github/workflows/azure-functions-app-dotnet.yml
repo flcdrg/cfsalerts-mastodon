@@ -128,7 +128,7 @@ jobs:
           package: "./function-app"
 
       - name: Application Insights Annotate
-        uses: ChristopheLav/appinsights-annotate@v2.0.2
+        uses: ChristopheLav/appinsights-annotate@v2.1.0
         with:
           app-id: ${{ secrets.APPINSIGHTS_APP_ID }}
           name: ${{ github.event.head_commit.message || github.sha }}
