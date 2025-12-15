@@ -92,7 +92,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: bicep
           path: "./bicep"
@@ -115,7 +115,7 @@ jobs:
           failOnStdErr: false
 
       - name: "Download Artifact"
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: function-app
           path: "./function-app"
