@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
+using System.Globalization;
 using Mastonet;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -40,17 +41,24 @@ public class CfsFunction
 
             var xml = XDocument.Parse(response);
             var xmlItems = GetAlertItems(xml).ToList();
+            var feedDate = ParseDate(xml.Root);
+            var feedLink = FirstLink(xml.Root);
 
             foreach (var item in xmlItems)
             {
-                var dateTime = ParseDate(item);
-                var title = FirstValue(item, "title", "headline", "event") ?? "Emergency alert";
-                var description = FirstValue(item, "description", "summary", "instruction") ?? string.Empty;
+                var dateTime = ParseDate(item) ?? feedDate ?? DateTime.MinValue;
+                var title = FirstValue(item, false, "title") ??
+                            FirstValue(item, true, "headline", "event") ??
+                            "Emergency alert";
+                var description = FirstValue(item, false, "description", "summary") ??
+                                  FirstValue(item, true, "description", "instruction") ??
+                                  string.Empty;
                 var link = FirstLink(item) ??
-                           FirstValue(xml.Root, "link") ??
+                           feedLink ??
                            "https://www.cfs.sa.gov.au/incidents/";
-                var id = FirstValue(item, "guid", "id", "identifier") ??
-                         BuildStableId(item, title, dateTime);
+                var id = FirstValue(item, false, "guid", "id", "identifier") ??
+                         FirstValue(item, true, "identifier") ??
+                         BuildStableId(title, link, dateTime);
 
                 newList.Add(new CfsFeedItem(
                     id,
@@ -105,20 +113,31 @@ public class CfsFunction
         return items;
     }
 
-    private static DateTime ParseDate(XElement item)
+    private static DateTime? ParseDate(XElement? item)
     {
-        var possibleDate = FirstValue(item, "pubDate", "updated", "published", "sent", "effective", "onset");
-        return DateTime.TryParse(possibleDate, out var parsedDate) ? parsedDate : DateTime.UtcNow;
+        var directDate = FirstValue(item, false, "pubDate", "updated", "published");
+        if (DateTime.TryParse(directDate, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var directParsedDate))
+            return directParsedDate;
+
+        var nestedDate = FirstValue(item, true, "sent", "effective", "onset", "updated", "published");
+        return DateTime.TryParse(nestedDate, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var nestedParsedDate) ? nestedParsedDate : null;
     }
 
-    private static string? FirstValue(XElement? element, params string[] names)
+    private static string? FirstValue(XElement? element, bool includeDescendants, params string[] names)
     {
         if (element is null)
             return null;
 
         foreach (var name in names)
         {
-            var matchedElement = element.DescendantsAndSelf().FirstOrDefault(e => e.Name.LocalName == name);
+            var matchedElement = element.Elements().FirstOrDefault(e => e.Name.LocalName == name);
+            if (!string.IsNullOrWhiteSpace(matchedElement?.Value))
+                return matchedElement.Value.Trim();
+
+            if (!includeDescendants)
+                continue;
+
+            matchedElement = element.Descendants().FirstOrDefault(e => e.Name.LocalName == name);
             if (!string.IsNullOrWhiteSpace(matchedElement?.Value))
                 return matchedElement.Value.Trim();
         }
@@ -126,22 +145,31 @@ public class CfsFunction
         return null;
     }
 
-    private static string? FirstLink(XElement item)
+    private static string? FirstLink(XElement? item)
     {
-        var linkElement = item.DescendantsAndSelf().FirstOrDefault(e => e.Name.LocalName == "link");
-        if (linkElement is null)
+        if (item is null)
             return null;
 
-        if (!string.IsNullOrWhiteSpace(linkElement.Value))
-            return linkElement.Value.Trim();
+        var linkElements = item.Elements().Where(e => e.Name.LocalName == "link").ToList();
+        if (linkElements.Count == 0)
+            return null;
 
-        var href = linkElement.Attribute("href")?.Value;
-        return string.IsNullOrWhiteSpace(href) ? null : href.Trim();
+        var preferredLink = linkElements
+            .FirstOrDefault(link =>
+                string.IsNullOrWhiteSpace(link.Attribute("rel")?.Value) ||
+                string.Equals(link.Attribute("rel")?.Value, "alternate", StringComparison.OrdinalIgnoreCase))
+            ?? linkElements.First();
+
+        var href = preferredLink.Attribute("href")?.Value;
+        if (!string.IsNullOrWhiteSpace(href))
+            return href.Trim();
+
+        return string.IsNullOrWhiteSpace(preferredLink.Value) ? null : preferredLink.Value.Trim();
     }
 
-    private static string BuildStableId(XElement item, string title, DateTime dateTime)
+    private static string BuildStableId(string title, string link, DateTime dateTime)
     {
-        var rawValue = $"{title}|{dateTime:O}|{item}";
+        var rawValue = $"{title}|{link}|{dateTime:O}";
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(rawValue));
         return Convert.ToHexString(hash);
     }
