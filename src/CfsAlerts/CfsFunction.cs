@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Xml.Linq;
 using Mastonet;
 using Microsoft.Azure.Functions.Worker;
@@ -8,6 +10,8 @@ namespace CfsAlerts;
 
 public class CfsFunction
 {
+    private const string AlertFeedUrl = "https://data.eso.sa.gov.au/feeds/prod/cap-au.xml";
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<CfsFunction> _logger;
     private readonly MastodonSettings _settings;
@@ -32,29 +36,30 @@ public class CfsFunction
         {
             using var httpClient = _httpClientFactory.CreateClient();
 
-            response = await httpClient.GetStringAsync(
-                "https://data.eso.sa.gov.au/prod/cfs/criimson/cfs_current_incidents.xml");
+            response = await httpClient.GetStringAsync(AlertFeedUrl);
 
             var xml = XDocument.Parse(response);
+            var xmlItems = GetAlertItems(xml).ToList();
 
-            if (xml.Root.Element("channel") is null)
-                throw new InvalidOperationException("No channel element found in feed");
+            foreach (var item in xmlItems)
+            {
+                var dateTime = ParseDate(item);
+                var title = FirstValue(item, "title", "headline", "event") ?? "Emergency alert";
+                var description = FirstValue(item, "description", "summary", "instruction") ?? string.Empty;
+                var link = FirstLink(item) ??
+                           FirstValue(xml.Root, "link") ??
+                           "https://www.cfs.sa.gov.au/incidents/";
+                var id = FirstValue(item, "guid", "id", "identifier") ??
+                         BuildStableId(item, title, dateTime);
 
-            var xmlItems = xml.Root.Element("channel")?.Elements("item").ToList();
-
-            if (xmlItems is not null)
-                foreach (var item in xmlItems)
-                {
-                    var dateTime = DateTime.Parse(item.Element("pubDate").Value);
-
-                    newList.Add(new CfsFeedItem(
-                        item.Element("guid").Value,
-                        item.Element("title").Value,
-                        item.Element("description").Value,
-                        item.Element("link").Value,
-                        dateTime
-                    ));
-                }
+                newList.Add(new CfsFeedItem(
+                    id,
+                    title,
+                    description,
+                    link,
+                    dateTime
+                ));
+            }
 
             // Find items in newList that are not in oldList
             var newItems = newList.Except(oldList).ToList();
@@ -86,5 +91,58 @@ public class CfsFunction
         }
 
         return newList;
+    }
+
+    private static IEnumerable<XElement> GetAlertItems(XDocument xml)
+    {
+        if (xml.Root is null)
+            return [];
+
+        if (xml.Root.Name.LocalName == "alert")
+            return [xml.Root];
+
+        var items = xml.Descendants().Where(e => e.Name.LocalName is "item" or "entry").ToList();
+        return items;
+    }
+
+    private static DateTime ParseDate(XElement item)
+    {
+        var possibleDate = FirstValue(item, "pubDate", "updated", "published", "sent", "effective", "onset");
+        return DateTime.TryParse(possibleDate, out var parsedDate) ? parsedDate : DateTime.UtcNow;
+    }
+
+    private static string? FirstValue(XElement? element, params string[] names)
+    {
+        if (element is null)
+            return null;
+
+        foreach (var name in names)
+        {
+            var matchedElement = element.DescendantsAndSelf().FirstOrDefault(e => e.Name.LocalName == name);
+            if (!string.IsNullOrWhiteSpace(matchedElement?.Value))
+                return matchedElement.Value.Trim();
+        }
+
+        return null;
+    }
+
+    private static string? FirstLink(XElement item)
+    {
+        var linkElement = item.DescendantsAndSelf().FirstOrDefault(e => e.Name.LocalName == "link");
+        if (linkElement is null)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(linkElement.Value))
+            return linkElement.Value.Trim();
+
+        var href = linkElement.Attribute("href")?.Value;
+        return string.IsNullOrWhiteSpace(href) ? null : href.Trim();
+    }
+
+    private static string BuildStableId(XElement item, string title, DateTime dateTime)
+    {
+        var rawValue = $"{title}|{dateTime:O}|{item}";
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(rawValue));
+        return Convert.ToHexString(hash);
     }
 }
