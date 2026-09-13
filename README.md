@@ -1,6 +1,6 @@
 # cfsalerts-mastodon
 
-Post toots to Mastodon from CFS RSS feed
+Post toots to Mastodon from the SA CAP-AU alerts feed
 
 ## Infrastructure
 

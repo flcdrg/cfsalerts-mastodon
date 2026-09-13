@@ -1,50 +1,39 @@
-﻿<?xml version='1.0' ?>
-<rss version='2.0' xmlns:atom='http://www.w3.org/2005/Atom'>
-	<channel>
-		<atom:link href='https://data.eso.sa.gov.au/prod/cfs/criimson/cfs_current_incidents.xml' rel='self' type='application/rss+xml' />
-		<ttl>15</ttl>
-		<title>Country Fire Service - South Australia - Current Incidents</title>
-		<link>https://www.cfs.sa.gov.au/incidents/</link>
-		<description>Current Incidents</description>
-		<item>
-			<link>https://www.cfs.sa.gov.au/incidents/</link>
-			<guid isPermaLink='false'>https://data.eso.sa.gov.au/prod/cfs/criimson/1564698.</guid>
-			<title>SOUTH EASTERN FREEWAY, TOTNESS (Vehicle Accident)</title>
-			<identifier>1564698</identifier>
-			<description>First Reported: Wednesday, 20 Dec 2023 16:01:00&lt;br&gt;Status: GOING&lt;br&gt;Region: 1</description>
-			<pubDate>Wed, 20 Dec 2023 05:44:04 +1030</pubDate>
-		</item>
-		<item>
-			<link>https://www.cfs.sa.gov.au/incidents/</link>
-			<guid isPermaLink='false'>https://data.eso.sa.gov.au/prod/cfs/criimson/1564696.</guid>
-			<title>REDGUM PLACE, ABERFOYLE PARK (Vehicle Accident)</title>
-			<identifier>1564696</identifier>
-			<description>First Reported: Wednesday, 20 Dec 2023 15:57:00&lt;br&gt;Status: GOING&lt;br&gt;Region: 1</description>
-			<pubDate>Wed, 20 Dec 2023 16:13:03 +1030</pubDate>
-		</item>
-		<item>
-			<link>https://www.cfs.sa.gov.au/incidents/</link>
-			<guid isPermaLink='false'>https://data.eso.sa.gov.au/prod/cfs/criimson/1564669.</guid>
-			<title>CHANDOS TCE/RAILWAY TCE N , LAMEROO (Rescue)</title>
-			<identifier>1564669</identifier>
-			<description>First Reported: Wednesday, 20 Dec 2023 12:55:00&lt;br&gt;Status: GOING&lt;br&gt;Region: 3</description>
-			<pubDate>Wed, 20 Dec 2023 15:34:02 +1030</pubDate>
-		</item>
-		<item>
-			<link>https://www.cfs.sa.gov.au/incidents/</link>
-			<guid isPermaLink='false'>https://data.eso.sa.gov.au/prod/cfs/criimson/1564639.</guid>
-			<title>HESTERS ROAD, RIVERTON (Grass Fire)</title>
-			<identifier>1564639</identifier>
-			<description>First Reported: Wednesday, 20 Dec 2023 10:00:00&lt;br&gt;Status: CONTROLLED&lt;br&gt;Region: 2</description>
-			<pubDate>Wed, 20 Dec 2023 11:15:09 +1030</pubDate>
-		</item>
-		<item>
-			<link>https://www.cfs.sa.gov.au/incidents/</link>
-			<guid isPermaLink='false'>https://data.eso.sa.gov.au/prod/cfs/criimson/1563632.0007231</guid>
-			<title>Gluepot ROAD, GLUE POT (Forest Fire)</title>
-			<identifier>1563632</identifier>
-			<description>First Reported: Wednesday, 13 Dec 2023 12:35:00&lt;br&gt;Status: SAFE&lt;br&gt;Region: 3</description>
-			<pubDate>Tue, 19 Dec 2023 11:32:30 +1030</pubDate>
-		</item>
-	</channel>
-</rss>
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:cap='urn:oasis:names:tc:emergency:cap:1.2'>
+  <title>South Australia CAP-AU Feed</title>
+  <updated>2026-09-13T12:30:00Z</updated>
+  <entry>
+    <id>urn:alert:sa-cfs:2026-0001</id>
+    <updated>2026-09-13T11:20:00Z</updated>
+    <title>BUSHFIRE ADVICE - ADELAIDE HILLS</title>
+    <summary>Monitor conditions in your area and stay informed.</summary>
+    <link href='https://www.cfs.sa.gov.au/warnings-restrictions/warnings/incidents-warnings/' />
+    <content type='application/cap+xml'>
+      <cap:alert>
+        <cap:identifier>sa-cfs-2026-0001</cap:identifier>
+        <cap:sent>2026-09-13T11:20:00Z</cap:sent>
+        <cap:info>
+          <cap:headline>BUSHFIRE ADVICE - ADELAIDE HILLS</cap:headline>
+          <cap:description>Monitor conditions in your area and stay informed.</cap:description>
+        </cap:info>
+      </cap:alert>
+    </content>
+  </entry>
+  <entry>
+    <id>urn:alert:sa-cfs:2026-0002</id>
+    <updated>2026-09-13T12:10:00Z</updated>
+    <title>BUSHFIRE WATCH AND ACT - MOUNT BARKER</title>
+    <summary>Leave now if conditions are unsafe.</summary>
+    <link href='https://www.cfs.sa.gov.au/warnings-restrictions/warnings/incidents-warnings/' />
+    <content type='application/cap+xml'>
+      <cap:alert>
+        <cap:identifier>sa-cfs-2026-0002</cap:identifier>
+        <cap:sent>2026-09-13T12:10:00Z</cap:sent>
+        <cap:info>
+          <cap:headline>BUSHFIRE WATCH AND ACT - MOUNT BARKER</cap:headline>
+          <cap:description>Leave now if conditions are unsafe.</cap:description>
+        </cap:info>
+      </cap:alert>
+    </content>
+  </entry>
+</feed>
