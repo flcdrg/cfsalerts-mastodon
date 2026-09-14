@@ -47,6 +47,9 @@ public class CfsFunctionTests
         var oldList = new List<CfsFeedItem>();
         var newList = await function.CheckAlerts(oldList);
 
+        Assert.Equal("https://www.cfs.sa.gov.au/incidents/", newList[1].Link);
+        Assert.DoesNotContain(newList, item => item.Id == "1564697");
+
         await Verify(newList);
     }
 }

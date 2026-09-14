@@ -16,6 +16,15 @@
     "Date": "20/12/2023",
     "Time": "15:57",
     "Status": "GOING",
+    "FBD": "1"
+  },
+  {
+    "IncidentNo": "1564697",
+    "Location_name": "SHOULD BE SKIPPED",
+    "Type": "Grass Fire",
+    "Date": "not-a-date",
+    "Time": "99:99",
+    "Status": "GOING",
     "FBD": "1",
     "Message_link": "https://www.cfs.sa.gov.au/incidents/"
   },
