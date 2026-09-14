@@ -1,34 +1,34 @@
 ﻿[
   {
-    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564698.,
+    Id: 1564698|SOUTH EASTERN FREEWAY, TOTNESS (Vehicle Accident)|First Reported: 20/12/2023 16:01<br>Status: GOING<br>Region: 1|https://www.cfs.sa.gov.au/incidents/,
     Title: SOUTH EASTERN FREEWAY, TOTNESS (Vehicle Accident),
     Description: First Reported: Wednesday, 20 Dec 2023 16:01:00<br>Status: GOING<br>Region: 1,
     Link: https://www.cfs.sa.gov.au/incidents/,
     PubDate: DateTime_1
   },
   {
-    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564696.,
+    Id: 1564696|REDGUM PLACE, ABERFOYLE PARK (Vehicle Accident)|First Reported: 20/12/2023 15:57<br>Status: GOING<br>Region: 1|https://www.cfs.sa.gov.au/incidents/,
     Title: REDGUM PLACE, ABERFOYLE PARK (Vehicle Accident),
     Description: First Reported: Wednesday, 20 Dec 2023 15:57:00<br>Status: GOING<br>Region: 1,
     Link: https://www.cfs.sa.gov.au/incidents/,
     PubDate: DateTime_2
   },
   {
-    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564669.,
+    Id: 1564669|CHANDOS TCE/RAILWAY TCE N , LAMEROO (Rescue)|First Reported: 20/12/2023 12:55<br>Status: GOING<br>Region: 3|https://www.cfs.sa.gov.au/incidents/,
     Title: CHANDOS TCE/RAILWAY TCE N , LAMEROO (Rescue),
     Description: First Reported: Wednesday, 20 Dec 2023 12:55:00<br>Status: GOING<br>Region: 3,
     Link: https://www.cfs.sa.gov.au/incidents/,
     PubDate: DateTime_3
   },
   {
-    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1564639.,
+    Id: 1564639|HESTERS ROAD, RIVERTON (Grass Fire)|First Reported: 20/12/2023 10:00<br>Status: CONTROLLED<br>Region: 2|https://www.cfs.sa.gov.au/incidents/,
     Title: HESTERS ROAD, RIVERTON (Grass Fire),
     Description: First Reported: Wednesday, 20 Dec 2023 10:00:00<br>Status: CONTROLLED<br>Region: 2,
     Link: https://www.cfs.sa.gov.au/incidents/,
     PubDate: DateTime_4
   },
   {
-    Id: https://data.eso.sa.gov.au/prod/cfs/criimson/1563632.0007231,
+    Id: 1563632|Gluepot ROAD, GLUE POT (Forest Fire)|First Reported: 13/12/2023 12:35<br>Status: SAFE<br>Region: 3|https://www.cfs.sa.gov.au/incidents/,
     Title: Gluepot ROAD, GLUE POT (Forest Fire),
     Description: First Reported: Wednesday, 13 Dec 2023 12:35:00<br>Status: SAFE<br>Region: 3,
     Link: https://www.cfs.sa.gov.au/incidents/,

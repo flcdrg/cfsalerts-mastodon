@@ -1,0 +1,61 @@
+[
+  {
+    "IncidentNo": "1564698",
+    "Location_name": "SOUTH EASTERN FREEWAY, TOTNESS",
+    "Type": "Vehicle Accident",
+    "Date": "20/12/2023",
+    "Time": "16:01",
+    "Status": "GOING",
+    "FBD": "1",
+    "Message_link": "https://www.cfs.sa.gov.au/incidents/"
+  },
+  {
+    "IncidentNo": "1564696",
+    "Location_name": "REDGUM PLACE, ABERFOYLE PARK",
+    "Type": "Vehicle Accident",
+    "Date": "20/12/2023",
+    "Time": "15:57",
+    "Status": "GOING",
+    "FBD": "1"
+  },
+  {
+    "IncidentNo": "1564697",
+    "Location_name": "SHOULD BE SKIPPED",
+    "Type": "Grass Fire",
+    "Date": "not-a-date",
+    "Time": "99:99",
+    "Status": "GOING",
+    "FBD": "1",
+    "Message_link": "https://www.cfs.sa.gov.au/incidents/"
+  },
+  {
+    "IncidentNo": "1564669",
+    "Location_name": "CHANDOS TCE/RAILWAY TCE N , LAMEROO",
+    "Type": "Rescue",
+    "Date": "20/12/2023",
+    "Time": "12:55",
+    "Status": "GOING",
+    "FBD": "3",
+    "Message_link": "https://www.cfs.sa.gov.au/incidents/"
+  },
+  {
+    "IncidentNo": "1564639",
+    "Location_name": "HESTERS ROAD, RIVERTON",
+    "Type": "Grass Fire",
+    "Date": "20/12/2023",
+    "Time": "10:00",
+    "Status": "CONTROLLED",
+    "FBD": "2",
+    "Message_link": "https://www.cfs.sa.gov.au/incidents/"
+  },
+  {
+    "IncidentNo": "1563632",
+    "Location_name": "Gluepot ROAD, GLUE POT",
+    "Type": "Forest Fire",
+    "Date": "13/12/2023",
+    "Time": "12:35",
+    "Status": "SAFE",
+    "FBD": "3",
+    "Message_link": "https://www.cfs.sa.gov.au/incidents/"
+  }
+]

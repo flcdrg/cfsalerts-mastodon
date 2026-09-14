@@ -32,16 +32,9 @@ public class CfsFunctionTests
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        string oldListContent;
         string newListContent;
 
-        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.oldList.xml")!)
-        {
-            using var reader = new StreamReader(stream);
-            oldListContent = reader.ReadToEnd();
-        }
-
-        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.newList.xml")!)
+        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.newList.json")!)
         {
             using var reader = new StreamReader(stream);
             newListContent = reader.ReadToEnd();
@@ -53,6 +46,9 @@ public class CfsFunctionTests
 
         var oldList = new List<CfsFeedItem>();
         var newList = await function.CheckAlerts(oldList);
+
+        Assert.Equal("https://www.cfs.sa.gov.au/incidents/", newList[1].Link);
+        Assert.DoesNotContain(newList, item => item.Id == "1564697");
 
         await Verify(newList);
     }
