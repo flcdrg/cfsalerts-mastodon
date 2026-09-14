@@ -98,7 +98,7 @@ public class CfsFunction
     private static string BuildDescription(string firstReportedDate, string firstReportedTime, string status, string region)
     {
         var parts = new List<string>();
-        var firstReported = string.Join(" ", [firstReportedDate, firstReportedTime].Where(static value => !string.IsNullOrWhiteSpace(value)));
+        var firstReported = string.Join(" ", new[] { firstReportedDate, firstReportedTime }.Where(static value => !string.IsNullOrWhiteSpace(value)));
 
         if (!string.IsNullOrWhiteSpace(firstReported))
             parts.Add($"First Reported: {firstReported}");
@@ -140,7 +140,7 @@ public class CfsFunction
 
     private static DateTime ParsePubDate(string firstReportedDate, string firstReportedTime)
     {
-        var value = string.Join(" ", [firstReportedDate, firstReportedTime].Where(static text => !string.IsNullOrWhiteSpace(text)));
+        var value = string.Join(" ", new[] { firstReportedDate, firstReportedTime }.Where(static text => !string.IsNullOrWhiteSpace(text)));
 
         if (DateTime.TryParseExact(value, DateTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dateTime))
             return dateTime;
