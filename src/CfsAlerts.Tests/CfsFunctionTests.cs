@@ -32,16 +32,9 @@ public class CfsFunctionTests
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        string oldListContent;
         string newListContent;
 
-        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.oldList.xml")!)
-        {
-            using var reader = new StreamReader(stream);
-            oldListContent = reader.ReadToEnd();
-        }
-
-        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.newList.xml")!)
+        await using (var stream = assembly.GetManifestResourceStream("CfsAlerts.Tests.newList.json")!)
         {
             using var reader = new StreamReader(stream);
             newListContent = reader.ReadToEnd();
