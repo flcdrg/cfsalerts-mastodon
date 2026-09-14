@@ -54,12 +54,19 @@ public class CfsFunction
                 var firstReportedDate = GetString(item, "Date");
                 var firstReportedTime = GetString(item, "Time");
 
+                if (!TryParsePubDate(firstReportedDate, firstReportedTime, out var pubDate))
+                {
+                    _logger.LogWarning("Skipping incident {incidentNumber} because its date '{date} {time}' could not be parsed",
+                        incidentNumber, firstReportedDate, firstReportedTime);
+                    continue;
+                }
+
                 newList.Add(new CfsFeedItem(
                     incidentNumber,
                     BuildTitle(GetString(item, "Location_name"), GetString(item, "Type")),
                     BuildDescription(firstReportedDate, firstReportedTime, GetString(item, "Status"), GetString(item, "FBD")),
                     GetString(item, "Message_link", DefaultIncidentLink),
-                    ParsePubDate(firstReportedDate, firstReportedTime)
+                    pubDate
                 ));
             }
 
@@ -138,13 +145,10 @@ public class CfsFunction
         };
     }
 
-    private static DateTime ParsePubDate(string firstReportedDate, string firstReportedTime)
+    private static bool TryParsePubDate(string firstReportedDate, string firstReportedTime, out DateTime dateTime)
     {
         var value = string.Join(" ", new[] { firstReportedDate, firstReportedTime }.Where(static text => !string.IsNullOrWhiteSpace(text)));
 
-        if (DateTime.TryParseExact(value, DateTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dateTime))
-            return dateTime;
-
-        throw new InvalidOperationException($"Could not parse incident date '{value}'");
+        return DateTime.TryParseExact(value, DateTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTime);
     }
 }
