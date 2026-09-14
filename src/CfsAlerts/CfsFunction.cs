@@ -53,6 +53,9 @@ public class CfsFunction
 
                 var firstReportedDate = GetString(item, "Date");
                 var firstReportedTime = GetString(item, "Time");
+                var title = BuildTitle(GetString(item, "Location_name"), GetString(item, "Type"));
+                var description = BuildDescription(firstReportedDate, firstReportedTime, GetString(item, "Status"), GetString(item, "FBD"));
+                var link = GetString(item, "Message_link", DefaultIncidentLink);
 
                 if (!TryParsePubDate(firstReportedDate, firstReportedTime, out var pubDate))
                 {
@@ -62,10 +65,10 @@ public class CfsFunction
                 }
 
                 newList.Add(new CfsFeedItem(
-                    incidentNumber,
-                    BuildTitle(GetString(item, "Location_name"), GetString(item, "Type")),
-                    BuildDescription(firstReportedDate, firstReportedTime, GetString(item, "Status"), GetString(item, "FBD")),
-                    GetString(item, "Message_link", DefaultIncidentLink),
+                    BuildId(incidentNumber, title, description, link),
+                    title,
+                    description,
+                    link,
                     pubDate
                 ));
             }
@@ -128,6 +131,11 @@ public class CfsFunction
             return incidentType;
 
         return $"{locationName} ({incidentType})";
+    }
+
+    private static string BuildId(string incidentNumber, string title, string description, string link)
+    {
+        return string.Join("|", new[] { incidentNumber, title, description, link });
     }
 
     private static string GetString(JsonElement item, string propertyName, string defaultValue = "")
