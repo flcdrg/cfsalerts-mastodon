@@ -10,13 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="newList.xml" />
-    <None Remove="oldList.xml" />
+    <None Remove="newList.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="newList.xml" />
-    <EmbeddedResource Include="oldList.xml" />
+    <EmbeddedResource Include="newList.json" />
   </ItemGroup>
 
   <ItemGroup>
