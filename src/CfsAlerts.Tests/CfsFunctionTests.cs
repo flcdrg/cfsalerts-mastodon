@@ -28,6 +28,62 @@ public class CfsFunctionTests
     }
 
     [Fact]
+    public async Task CheckAlerts_CurrentFeed_ParsesNestedIncident()
+    {
+        const string feed = """
+            [
+              {
+                "id": "F2611160104",
+                "reported": { "date": "16/11/2026", "time": "16:38", "tz": "Australia/Adelaide" },
+                "agency": "CFS",
+                "location": { "name": "PALMER", "fbd": "MURRAYLANDS" },
+                "incident": { "type": "GRASS FIRE", "status": "Going" },
+                "messages": []
+              },
+              {
+                "id": "bad-date",
+                "reported": { "date": "invalid", "time": "16:38" },
+                "location": { "name": "OTHER" },
+                "incident": { "type": "FIRE", "status": "Going" }
+              }
+            ]
+            """;
+        var settings = Options.Create(new MastodonSettings { Instance = "https://example.com", Token = "test" });
+        var function = new CfsFunction(GetStringClient(feed), NullLogger<CfsFunction>.Instance, settings);
+
+        var item = Assert.Single(await function.CheckAlerts([]));
+
+        Assert.Equal("PALMER (GRASS FIRE)", item.Title);
+        Assert.Equal("First Reported: 16/11/2026 16:38<br>Status: Going<br>Region: MURRAYLANDS", item.Description);
+        Assert.Equal("https://www.cfs.sa.gov.au/incidents/", item.Link);
+        Assert.Equal(new DateTime(2026, 11, 16, 16, 38, 0), item.PubDate);
+        Assert.Equal("F2611160104|PALMER (GRASS FIRE)|First Reported: 16/11/2026 16:38<br>Status: Going<br>Region: MURRAYLANDS|https://www.cfs.sa.gov.au/incidents/", item.Id);
+    }
+
+    [Fact]
+    public async Task CheckAlerts_CurrentFeed_StatusChangeProducesNewIdentity()
+    {
+        const string feed = """
+            [{
+              "id": "F2611160104",
+              "reported": { "date": "16/11/2026", "time": "16:38" },
+              "location": { "name": "PALMER", "fbd": "MURRAYLANDS" },
+              "incident": { "type": "GRASS FIRE", "status": "Contained" }
+            }]
+            """;
+        var settings = Options.Create(new MastodonSettings { Instance = "https://example.com", Token = "test" });
+        var function = new CfsFunction(GetStringClient(feed), NullLogger<CfsFunction>.Instance, settings);
+        var oldItem = new CfsFeedItem(
+            "F2611160104|PALMER (GRASS FIRE)|First Reported: 16/11/2026 16:38<br>Status: Going<br>Region: MURRAYLANDS|https://www.cfs.sa.gov.au/incidents/",
+            "", "", "", default);
+
+        var item = Assert.Single(await function.CheckAlerts([oldItem]));
+
+        Assert.Contains("Status: Contained", item.Description);
+        Assert.NotEqual(oldItem, item);
+    }
+
+    [Fact]
     public async Task Test1()
     {
         var assembly = Assembly.GetExecutingAssembly();

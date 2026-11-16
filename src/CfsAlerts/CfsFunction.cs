@@ -46,16 +46,26 @@ public class CfsFunction
 
             foreach (var item in document.RootElement.EnumerateArray())
             {
-                var incidentNumber = GetString(item, "IncidentNo");
+                var incidentNumber = GetString(item, "id", GetString(item, "IncidentNo"));
 
                 if (string.IsNullOrWhiteSpace(incidentNumber))
+                {
+                    _logger.LogWarning("Skipping incident because its ID is missing");
                     continue;
+                }
 
-                var firstReportedDate = GetString(item, "Date");
-                var firstReportedTime = GetString(item, "Time");
-                var title = BuildTitle(GetString(item, "Location_name"), GetString(item, "Type"));
-                var description = BuildDescription(firstReportedDate, firstReportedTime, GetString(item, "Status"), GetString(item, "FBD"));
-var link = GetString(item, "Message_link");
+                var reported = GetObject(item, "reported");
+                var location = GetObject(item, "location");
+                var incident = GetObject(item, "incident");
+                var firstReportedDate = GetString(reported, "date", GetString(item, "Date"));
+                var firstReportedTime = GetString(reported, "time", GetString(item, "Time"));
+                var title = BuildTitle(
+                    GetString(location, "name", GetString(item, "Location_name")),
+                    GetString(incident, "type", GetString(item, "Type")));
+                var description = BuildDescription(firstReportedDate, firstReportedTime,
+                    GetString(incident, "status", GetString(item, "Status")),
+                    GetString(location, "fbd", GetString(item, "FBD")));
+                var link = GetString(item, "Message_link");
                 if (string.IsNullOrWhiteSpace(link))
                     link = DefaultIncidentLink;
 
@@ -142,7 +152,7 @@ var link = GetString(item, "Message_link");
 
     private static string GetString(JsonElement item, string propertyName, string defaultValue = "")
     {
-        if (!item.TryGetProperty(propertyName, out var property))
+        if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty(propertyName, out var property))
             return defaultValue;
 
         return property.ValueKind switch
@@ -153,6 +163,15 @@ var link = GetString(item, "Message_link");
             JsonValueKind.False => bool.FalseString,
             _ => defaultValue
         };
+    }
+
+    private static JsonElement GetObject(JsonElement item, string propertyName)
+    {
+        return item.ValueKind == JsonValueKind.Object &&
+               item.TryGetProperty(propertyName, out var property) &&
+               property.ValueKind == JsonValueKind.Object
+            ? property
+            : default;
     }
 
     private static bool TryParsePubDate(string firstReportedDate, string firstReportedTime, out DateTime dateTime)
