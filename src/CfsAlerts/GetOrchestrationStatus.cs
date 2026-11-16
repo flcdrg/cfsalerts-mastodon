@@ -8,21 +8,16 @@ namespace CfsAlerts
 {
     public class GetOrchestrationStatus
     {
-        private readonly DurableTaskClient _durableTaskClient;
-
-        public GetOrchestrationStatus(DurableTaskClient durableTaskClient)
-        {
-            _durableTaskClient = durableTaskClient;
-        }
-
         [Function("GetOrchestrationStatus")]
-        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        public async Task<HttpResponseData> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req,
+            [DurableClient] DurableTaskClient durableTaskClient)
         {
             var sb = new StringBuilder();
             sb.AppendLine("<html><head><title>Orchestration Status</title></head><body>");
             sb.AppendLine("<h1>Orchestrations</h1>");
             sb.AppendLine("<ul>");
-            await foreach (var orchestration  in _durableTaskClient.GetAllInstancesAsync()) {
+            await foreach (var orchestration  in durableTaskClient.GetAllInstancesAsync()) {
                 sb.AppendLine($"<li>{orchestration.InstanceId} - {orchestration.Name} - {orchestration.RuntimeStatus}</li>");
             }
             sb.AppendLine("</ul>");

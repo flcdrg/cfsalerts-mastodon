@@ -1,5 +1,4 @@
 using CfsAlerts;
-using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,11 +12,6 @@ var host = new HostBuilder()
     .ConfigureServices(services =>
     {
         services.AddHttpClient();
-        services.AddDurableTaskClient(builder =>
-        {
-            builder.UseGrpc();
-        });
-
         services.AddOptions<MastodonSettings>()
             .Configure<IConfiguration>((settings, configuration) =>
             {
