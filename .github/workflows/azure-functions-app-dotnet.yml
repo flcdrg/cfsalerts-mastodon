@@ -38,7 +38,7 @@ jobs:
           scope: resourcegroup
           resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
-          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
+          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }} monitorEnabled=${{ vars.FLEX_MONITOR_ENABLED == 'true' }}"
           failOnStdErr: false
           additionalArguments: --what-if
 
@@ -111,7 +111,7 @@ jobs:
           scope: resourcegroup
           resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
-          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
+          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }} monitorEnabled=${{ vars.FLEX_MONITOR_ENABLED == 'true' }}"
           failOnStdErr: false
 
       - name: "Download Artifact"
@@ -126,6 +126,7 @@ jobs:
         with:
           app-name: ${{ steps.deploy.outputs.functionAppName }}
           package: "./function-app"
+          sku: flexconsumption
 
       - name: Application Insights Annotate
         uses: ChristopheLav/appinsights-annotate@v2.1.2
@@ -135,6 +136,7 @@ jobs:
           treat-error-as-warning: true
 
       - name: "Start Orchestration"
+        if: steps.deploy.outputs.monitorEnabled == 'true'
         shell: bash
         run: |
           # Get function key
