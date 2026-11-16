@@ -36,7 +36,8 @@ create a separate `.github/copilot-instructions.md`.
   description format produced by the parser.
 - The GitHub Actions workflow builds and performs a Bicep what-if on pull
   requests; it does not run the test suite. On `main` it deploys the Bicep and
-  Release app, then invokes `StartOrchestration`.
+  Release app. It invokes `StartOrchestration` only when `FLEX_MONITOR_ENABLED`
+  is `true` in the `dev` GitHub environment.
 
 ## Architecture
 
@@ -67,6 +68,10 @@ create a separate `.github/copilot-instructions.md`.
 - `bicep/main.bicep` provisions the Linux Function App, storage, hosting plan
   and Application Insights. Resource names are specific to this deployment;
   adjust them before provisioning another environment.
+- The template targets Flex Consumption using new `-flex` app/plan names and
+  the original Durable storage/task hub. `monitorEnabled` defaults to false;
+  never enable both apps against that hub. Follow the README cutover/rollback
+  procedure and use incremental deployment to preserve the original resources.
 - When diagnosing missing posts, compare the last `CheckAlerts` run and the
   15-minute Release timer with the deployment time before concluding the
   orchestration stopped; check its status and allow for telemetry delay.

@@ -13,15 +13,25 @@ param location string = resourceGroup().location
 param appInsightsLocation string = resourceGroup().location
 
 @description('The language worker runtime to load in the function app.')
+@allowed([
+  'dotnet-isolated'
+])
 param runtime string = 'dotnet-isolated'
 
+@secure()
 param mastadonToken string
 
-var functionAppName = 'func-cfsalerts-prod-australiasoutheast'
-var hostingPlanName = 'plan-cfsalerts-prod-australiasoutheast'
+@description('Enable only after the original Consumption app has been stopped. Both apps share Durable state.')
+param monitorEnabled bool = false
+
+@description('Existing Durable task hub name. Verify against the source app before cutover.')
+var durableTaskHubName = 'funccfsalertsprodaustraliasoutheast'
+
+var functionAppName = 'func-cfsalerts-prod-australiasoutheast-flex'
+var hostingPlanName = 'plan-cfsalerts-prod-australiasoutheast-flex'
 var applicationInsightsName = 'appi-cfsalerts-prod-australiasoutheast'
 var storageAccountName = 'stcfsalertsprodause'
-var functionWorkerRuntime = runtime
+var deploymentContainerName = 'app-packages-cfsalerts-flex'
 
 // https://learn.microsoft.com/azure/templates/microsoft.storage/storageaccounts?WT.mc_id=DOP-MVP-5001655
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
@@ -40,11 +50,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 }
 
 // https://learn.microsoft.com/azure/templates/microsoft.web/serverfarms?WT.mc_id=DOP-MVP-5001655
-resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
+resource hostingPlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: hostingPlanName
   location: location
   sku: {
-    name: 'Y1'
+    name: 'FC1'
+    tier: 'FlexConsumption'
   }
   kind: 'functionapp'
   properties: {
@@ -52,8 +63,21 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   }
 }
 
+resource deploymentBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-05-01' existing = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource deploymentContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-05-01' = {
+  parent: deploymentBlobService
+  name: deploymentContainerName
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 // https://learn.microsoft.com/azure/templates/microsoft.web/sites?WT.mc_id=DOP-MVP-5001655
-resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
+resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp,linux'
@@ -64,6 +88,26 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   properties: {
     serverFarmId: hostingPlan.id
     reserved: true
+    functionAppConfig: {
+      deployment: {
+        storage: {
+          type: 'blobContainer'
+          value: '${storageAccount.properties.primaryEndpoints.blob}${deploymentContainer.name}'
+          authentication: {
+            type: 'StorageAccountConnectionString'
+            storageAccountConnectionStringName: 'AzureWebJobsStorage'
+          }
+        }
+      }
+      runtime: {
+        name: runtime
+        version: '8.0'
+      }
+      scaleAndConcurrency: {
+        instanceMemoryMB: 512
+        maximumInstanceCount: 40
+      }
+    }
     siteConfig: {
       appSettings: [
         {
@@ -71,28 +115,32 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
         }
         {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: applicationInsights.properties.ConnectionString
         }
         {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: toLower(functionAppName)
+          name: 'AzureFunctionsJobHost__extensions__durableTask__hubName'
+          value: durableTaskHubName
         }
         {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
+          name: 'AzureFunctionsWebHost__hostid'
+          value: 'cfsalerts-prod-flex'
         }
         {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: applicationInsights.properties.InstrumentationKey
+          name: 'AzureWebJobs.MonitorJobStatus.Disabled'
+          value: string(!monitorEnabled)
         }
         {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: functionWorkerRuntime
+          name: 'AzureWebJobs.CheckAlerts.Disabled'
+          value: string(!monitorEnabled)
         }
         {
-          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
-          value: '1'
+          name: 'AzureWebJobs.StartOrchestration.Disabled'
+          value: string(!monitorEnabled)
+        }
+        {
+          name: 'AzureWebJobs.StopOrchestrations.Disabled'
+          value: string(!monitorEnabled)
         }
         {
           name: 'MastodonSettings__token'
@@ -105,11 +153,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       ]
 
       minTlsVersion: '1.2'
-      linuxFxVersion: 'DOTNET-ISOLATED|8.0'
-      alwaysOn: false
-      localMySqlEnabled: false
-      netFrameworkVersion: 'v4.6'
-      ftpsState: 'Disabled'
       http20Enabled: true
     }
     httpsOnly: true
@@ -118,6 +161,9 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
 
 @description('The name of the function app.')
 output functionAppName string = functionApp.name
+
+@description('Whether deployment may invoke StartOrchestration.')
+output monitorEnabled bool = monitorEnabled
 
 // https://learn.microsoft.com/azure/templates/microsoft.insights/components?WT.mc_id=DOP-MVP-5001655
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
