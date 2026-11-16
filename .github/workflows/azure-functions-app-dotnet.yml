@@ -136,13 +136,9 @@ jobs:
 
       - name: "Start Orchestration"
         shell: bash
-        continue-on-error: true
         run: |
           # Get function key
           KEY=$(az functionapp function keys list --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ steps.deploy.outputs.functionAppName }} --function-name StartOrchestration --query "default" -o tsv)
 
           URL=$(az functionapp function show --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ steps.deploy.outputs.functionAppName }} --function-name StartOrchestration --query "invokeUrlTemplate" -o tsv)
-          # Call function https://func-cfsalerts-prod-australiasoutheast.azurewebsites.net/api/StartOrchestration?code=tyPZ23gIY37ICFejcbd-2OwQV39GhLbDs2o4N8LVXgXdAzFu12YEMA==
-
-          echo "$URL?code=$KEY"
-          curl -X GET $URL?code=$KEY
+          curl --fail-with-body --silent --show-error -H "x-functions-key: $KEY" "$URL"

@@ -9,32 +9,41 @@ namespace CfsAlerts
 {
     public class StartOrchestration
     {
-        private readonly DurableTaskClient _durableTaskClient;
         private readonly ILogger<StartOrchestration> _logger;
 
-        public StartOrchestration(DurableTaskClient durableTaskClient, ILogger<StartOrchestration> logger)
+        public StartOrchestration(ILogger<StartOrchestration> logger)
         {
-            _durableTaskClient = durableTaskClient;
             _logger = logger;
         }
 
         [Function("StartOrchestration")]
-        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        public async Task<HttpResponseData> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req,
+            [DurableClient] DurableTaskClient durableTaskClient)
         {
-            _logger.LogInformation("Starting orchestration");
-
-            // This should ensure we only have a single orchestration running at a time
             const string instanceId = "MonitorJobStatus 1B5BF432-5DEA-481D-AE45-32AB347C8F2F";
+            var existing = await durableTaskClient.GetInstanceAsync(instanceId);
 
-            try
+#pragma warning disable CS0618 // Protect a legacy instance transitioning through ContinueAsNew.
+            if (existing?.RuntimeStatus is OrchestrationRuntimeStatus.Running
+                or OrchestrationRuntimeStatus.Pending
+                or OrchestrationRuntimeStatus.ContinuedAsNew
+                or OrchestrationRuntimeStatus.Suspended)
             {
-                await _durableTaskClient.ScheduleNewOrchestrationInstanceAsync("MonitorJobStatus", new List<CfsFeedItem>(), new StartOrchestrationOptions( InstanceId: instanceId));
+                _logger.LogInformation("Orchestration {instanceId} already exists with status {status}", instanceId, existing.RuntimeStatus);
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogWarning(ex, "ScheduleNewOrchestrationInstanceAsync failed - maybe it was already running?");
+                var options = new StartOrchestrationOptions(InstanceId: instanceId).WithDedupeStatuses(
+                    OrchestrationRuntimeStatus.Running,
+                    OrchestrationRuntimeStatus.Pending,
+                    OrchestrationRuntimeStatus.ContinuedAsNew,
+                    OrchestrationRuntimeStatus.Suspended);
+                await durableTaskClient.ScheduleNewOrchestrationInstanceAsync(nameof(MonitorJobStatus), new List<CfsFeedItem>(), options);
+                _logger.LogInformation("Started orchestration {instanceId}", instanceId);
             }
-            
+#pragma warning restore CS0618
+
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 

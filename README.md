@@ -2,6 +2,13 @@
 
 Post toots to Mastodon from the CFS current incidents JSON feed
 
+## Orchestration
+
+The function-key-protected `StartOrchestration` endpoint starts the monitor if
+it is not already active. Deployments call this endpoint and fail if it cannot
+reach Durable Functions. `GetOrchestrationStatus` lists instances and
+`StopOrchestrations` terminates them.
+
 ## Infrastructure
 
 Note: You will need to adjust the names if you are trying to provision your own resources.

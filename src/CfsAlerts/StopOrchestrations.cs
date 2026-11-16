@@ -7,26 +7,21 @@ namespace CfsAlerts
 {
     public class StopOrchestrations
     {
-        private readonly DurableTaskClient _durableTaskClient;
-
-        public StopOrchestrations(DurableTaskClient durableTaskClient)
-        {
-            _durableTaskClient = durableTaskClient;
-        }
-
         [Function("StopOrchestrations")]
-        public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        public async Task<HttpResponseData> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req,
+            [DurableClient] DurableTaskClient durableTaskClient)
         {
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
-            await foreach (var orchestration in _durableTaskClient.GetAllInstancesAsync())
+            await foreach (var orchestration in durableTaskClient.GetAllInstancesAsync())
             {
                 if (orchestration.RuntimeStatus != OrchestrationRuntimeStatus.Terminated)
                 {
                     await response.WriteStringAsync($"Stopping instance {orchestration.InstanceId}");
 
-                    await _durableTaskClient.TerminateInstanceAsync(orchestration.InstanceId, CancellationToken.None);
+                    await durableTaskClient.TerminateInstanceAsync(orchestration.InstanceId, CancellationToken.None);
                 }
             }
 
