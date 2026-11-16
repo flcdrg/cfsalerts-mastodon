@@ -21,12 +21,6 @@ param runtime string = 'dotnet-isolated'
 @secure()
 param mastadonToken string
 
-@description('Enable only after the original Consumption app has been stopped. Both apps share Durable state.')
-param monitorEnabled bool = false
-
-@description('Existing Durable task hub name. Verify against the source app before cutover.')
-var durableTaskHubName = 'funccfsalertsprodaustraliasoutheast'
-
 var functionAppName = 'func-cfsalerts-prod-australiasoutheast-flex'
 var hostingPlanName = 'plan-cfsalerts-prod-australiasoutheast-flex'
 var applicationInsightsName = 'appi-cfsalerts-prod-australiasoutheast'
@@ -119,28 +113,8 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           value: applicationInsights.properties.ConnectionString
         }
         {
-          name: 'AzureFunctionsJobHost__extensions__durableTask__hubName'
-          value: durableTaskHubName
-        }
-        {
           name: 'AzureFunctionsWebHost__hostid'
           value: 'cfsalerts-prod-flex'
-        }
-        {
-          name: 'AzureWebJobs.MonitorJobStatus.Disabled'
-          value: string(!monitorEnabled)
-        }
-        {
-          name: 'AzureWebJobs.CheckAlerts.Disabled'
-          value: string(!monitorEnabled)
-        }
-        {
-          name: 'AzureWebJobs.StartOrchestration.Disabled'
-          value: string(!monitorEnabled)
-        }
-        {
-          name: 'AzureWebJobs.StopOrchestrations.Disabled'
-          value: string(!monitorEnabled)
         }
         {
           name: 'MastodonSettings__token'
@@ -161,9 +135,6 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
 
 @description('The name of the function app.')
 output functionAppName string = functionApp.name
-
-@description('Whether deployment may invoke StartOrchestration.')
-output monitorEnabled bool = monitorEnabled
 
 // https://learn.microsoft.com/azure/templates/microsoft.insights/components?WT.mc_id=DOP-MVP-5001655
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
