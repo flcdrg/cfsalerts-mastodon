@@ -55,7 +55,9 @@ public class CfsFunction
                 var firstReportedTime = GetString(item, "Time");
                 var title = BuildTitle(GetString(item, "Location_name"), GetString(item, "Type"));
                 var description = BuildDescription(firstReportedDate, firstReportedTime, GetString(item, "Status"), GetString(item, "FBD"));
-                var link = GetString(item, "Message_link", DefaultIncidentLink);
+var link = GetString(item, "Message_link");
+                if (string.IsNullOrWhiteSpace(link))
+                    link = DefaultIncidentLink;
 
                 if (!TryParsePubDate(firstReportedDate, firstReportedTime, out var pubDate))
                 {
