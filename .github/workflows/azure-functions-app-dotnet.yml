@@ -38,7 +38,7 @@ jobs:
           scope: resourcegroup
           resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
-          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }} monitorEnabled=${{ vars.FLEX_MONITOR_ENABLED == 'true' }}"
+          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
           failOnStdErr: false
           additionalArguments: --what-if
 
@@ -111,7 +111,7 @@ jobs:
           scope: resourcegroup
           resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
           template: ./bicep/main.bicep
-          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }} monitorEnabled=${{ vars.FLEX_MONITOR_ENABLED == 'true' }}"
+          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
           failOnStdErr: false
 
       - name: "Download Artifact"
@@ -136,7 +136,6 @@ jobs:
           treat-error-as-warning: true
 
       - name: "Start Orchestration"
-        if: steps.deploy.outputs.monitorEnabled == 'true'
         shell: bash
         run: |
           # Get function key
