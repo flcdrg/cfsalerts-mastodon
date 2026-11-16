@@ -32,15 +32,17 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Test
-        uses: azure/arm-deploy@v2
+      - name: What-If
+        uses: azure/bicep-deploy@v2
         with:
-          scope: resourcegroup
-          resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
-          template: ./bicep/main.bicep
-          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
-          failOnStdErr: false
-          additionalArguments: --what-if
+          type: deployment
+          operation: whatIf
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ vars.AZURE_RESOURCE_GROUP }}
+          template-file: ./bicep/main.bicep
+          parameters: |
+            mastadonToken: ${{ secrets.MASTODONSETTINGS_TOKEN }}
 
       - name: Archive Bicep
         if: success() && github.ref == 'refs/heads/main'
@@ -105,14 +107,17 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: deploy
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         id: deploy
         with:
-          scope: resourcegroup
-          resourceGroupName: ${{ vars.AZURE_RESOURCE_GROUP }}
-          template: ./bicep/main.bicep
-          parameters: "mastadonToken=${{ secrets.MASTODONSETTINGS_TOKEN }}"
-          failOnStdErr: false
+          type: deployment
+          operation: create
+          scope: resourceGroup
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ vars.AZURE_RESOURCE_GROUP }}
+          template-file: ./bicep/main.bicep
+          parameters: |
+            mastadonToken: ${{ secrets.MASTODONSETTINGS_TOKEN }}
 
       - name: "Download Artifact"
         uses: actions/download-artifact@v8
